@@ -1,108 +1,117 @@
-NLP701 Assignment 2: Multilingual Characterization and Extraction of Narratives
+# NLP Assignment 2: Subtask C – Explaining Dominant Narratives
 
+**Author:** Besher Hassan  
+**MBZUAI Leaderboard Team Name:** Besher  
+**Email:** Besher.Hassan@mbzuai.ac.ae
 
-This repository contains the implementation for Subtask C of SemEval-2025 Task 10, focusing on generating concise and evidence-supported explanations for dominant narratives in online news articles. The project employs a fine-tuned BART-base model to achieve state-of-the-art performance for this task.
+---
 
+## Abstract
 
-Setup
+This report presents my approach to Subtask C of SemEval-2025 Task 10 (Organizers, 2025), which focuses on generating concise and evidence-supported explanations for dominant narratives in English news articles. I experimented with multiple transformer models, including GPT-2 (small, medium, large) (Radford et al., 2019) and BART (base, large) (Lewis et al., 2019), and ultimately selected BART-base for its balance of performance and efficiency. By integrating contextual sentence extraction with the `all-MiniLM-L6-v2` sentence encoder (Wang et al., 2020) and fine-tuning BART-base, the model achieved a BERTScore (Zhang et al., 2020) F1 of **0.8981** on the test set and **0.74662** on the development set.
 
-Prerequisites:
-Ensure you have the following installed on your system:
+---
 
-Python 3.8 or higher
-pip (Python package manager)
-GPU-enabled system for training (optional but recommended)
+## 1. Introduction
 
-Install the required Python packages:
-pip install -r requirements.txt
+Narratives play a central role in shaping public opinion, especially in online news, where framing can influence perception. Understanding and explaining these narratives is critical for combating disinformation and aiding decision-makers. Subtask C focuses on generating concise explanations for dominant narratives in news articles using evidence from the text. This work develops a robust pipeline combining contextual sentence extraction and structured input formatting to produce high-quality explanations.
 
-Place the necessary data files (combined_train_set_with_splits.xlsx and combined_dev_set.xlsx) in the data/ directory.
+---
 
+## 2. Dataset
 
+The dataset comprises annotated articles from two domains: Ukraine-Russia War (URW) and Climate Change (CC). Each entry contains:
+- `article_id`: A unique identifier for the article.  
+- `dominant_narrative`: The overarching narrative conveyed by the article.  
+- `dominant_subnarrative`: A finer-grained narrative under the dominant narrative (or `"none"` if unavailable).  
+- `article_text`: The full text of the news article, with an average sentence length of 22 words.  
+- `explanation`: A human-written explanation (gold label) justifying the narrative assignment, with an average length of 20 words.  
 
-Workflow
+Dataset splits:
+- **Training set:** 88 articles, internally split into 90% training and 10% validation/test.  
+- **Development set:** 30 articles without human-annotated explanations; not used for training.
 
-1. Preprocessing
-Prepare the dataset for training and evaluation by extracting contextual sentences and formatting the input.
+---
 
-python src/preprocess.py
+## 3. Methodology
 
+### 3.1 Key Features for Best Performance
 
-2. Training
-Train the BART-base model on the prepared dataset.
+1. **Contextual Sentence Extraction:** Using `all-MiniLM-L6-v2`, the pipeline extracts the three most relevant sentences from each article based on cosine similarity with a query formed from the dominant narrative and subnarrative.
+2. **Input Formatting:** Inputs are structured compactly to respect token limits:
 
-python src/train.py
+   ```text
+   <N> Dominant Narrative </N>
+   <Sub-N> Subnarrative </Sub-N>
+   <Art> Contextual sentences </Art>
+   ```
 
+   *Example:*  
+   `<N> Criticism of Climate Movement </N> <Sub-N> Industrial Progress Opposition </Sub-N> <Art> Activists oppose industrial development without evidence. </Art>`
 
-3. Evaluation
-Evaluate the model on the validation set and compute metrics such as BERTScore.
+3. **Fine-Tuned BART-base:** Chosen for its balance of performance and efficiency compared to GPT-2 variants and BART-large.
+4. **Custom Dataset Class:** Handles tokenization, truncation (512 tokens for inputs, 80 words for outputs), and batching.
+5. **Training Configuration:** Learning rate `5 × 10^-5`, batch size `8`, `10` epochs, linear scheduler without warmup.
 
-python src/evaluate.py
+---
 
+## 4. Experiments and Results
 
-4. Text Generation
-Generate explanations for the development set using the fine-tuned model.
+### 4.1 Quantitative Results
 
-python src/generate.py
+Multiple models were evaluated using BERTScore metrics (Precision, Recall, and F1). GPT-2 small served as the baseline with an F1 of 0.7956. BART-base provided the highest F1 of 0.8981 on the test set and 0.74662 on the development set.
 
-5. Run All (Optional)
+![Model Performance Comparison](table.png)
 
-Run the entire workflow using the provided shell script:
+| Model           | Size (M Params) | Precision | Recall | F1     |
+|-----------------|-----------------|-----------|--------|--------|
+| GPT-2 Small     | 124             | 0.8032    | 0.7891 | 0.7956 |
+| GPT-2 Medium    | 355             | 0.8456    | 0.8302 | 0.8378 |
+| GPT-2 Large     | 774             | 0.8621    | 0.8434 | 0.8526 |
+| BART-Large      | 400             | 0.9042    | 0.8870 | 0.8955 |
+| **BART-base**   | 140             | 0.9085    | 0.8879 | **0.8981** |
 
-bash run.sh
+![Leaderboard Placement](leaderboard.png)
 
+### 4.2 Qualitative Results
 
-Results
+- **Climate Change (CC) Example**  
+  - *Dominant Narrative:* Criticism of Institutions and Authorities  
+  - *Dominant Subnarrative:* Criticism of national governments  
+  - *Gold Explanation:* The article discusses resistance to the UK government's Climate Con Programme without detailing residents' concerns.  
+  - *Generated Explanation:* Critiques the UK government for inadequate climate action and insufficient urban support.
 
-Quantitative Results
+- **Ukraine-Russia War (URW) Example**  
+  - *Dominant Narrative:* Discrediting the West, Diplomacy  
+  - *Dominant Subnarrative:* West is tired of Ukraine  
+  - *Gold Explanation:* Highlights allies as hesitant to provide further military aid due to elections and funding concerns.  
+  - *Generated Explanation:* Attributes aggression to Western countries and cites inadequate support for Ukraine.
 
-The fine-tuned BART-base model achieved the following performance on the test set:
+---
 
-BERTScore Precision: 0.9085
-BERTScore Recall: 0.8879
-BERTScore F1: 0.8981
+## 5. Discussion
 
-Qualitative Results
-Examples of generated explanations are provided in the data/combined_dev_set_with_explanations.xlsx.
+The fine-tuned BART-base model demonstrated robust performance, effectively capturing dominant narratives such as institutional criticism and geopolitical hesitancy, with average generated explanations of 18 words (aligned with the 80-token maximum and 20-word gold average). However, edge cases revealed limitations:
+- **Climate Con Programme example:** The generated explanation aligned with the narrative but missed key programme details.
+- **URW example:** The model misinterpreted the narrative, labeling the West as aggressors while correctly noting allied hesitance.
 
+### Future Improvements
 
+- **Data Augmentation:** Use GPT-4o to synthesize alternative explanations for underrepresented cases and to paraphrase existing samples.  
+- **Enhanced Context Handling:** Integrate richer contextual embeddings or refined preprocessing to improve sentence-level comprehension.
 
-Model
-The BART-base model was fine-tuned using the following configuration:
+---
 
-Learning Rate: 5 x 10^-5
-Batch Size: 8
-Epochs: 10
-Optimizer: AdamW
-Scheduler: Linear decay
+## 6. Conclusion
 
-Saved model files are located in models/best_bart_model_assignment2/.
+This approach establishes an effective framework for explaining dominant narratives by combining contextual sentence extraction with a fine-tuned BART-base model. The method delivers competitive BERTScore performance, and targeted data augmentation plus improved context modeling offer promising avenues for further gains.
 
+---
 
+## References
 
-Key Features
-
-1- Contextual Sentence Extraction:
-
-Extracts the most relevant sentences from articles using all-MiniLM-L6-v2 for cosine similarity.
-
-2- Compact Input Formatting:
-
-Combines dominant narrative, subnarrative, and contextual sentences in a structured input.
-
-3- Fine-Tuned BART-base
-
-Optimized for both performance and efficiency.
-
-
-
-Contributions
-
-This project was developed by Besher Hassan for NLP701 at MBZUAI. For any questions or issues, feel free to reach out to:
-
-Email: Besher.Hassan@mbzuai.ac.ae
-
-License
-
-This project is for academic use only as part of the NLP701 course.
-
+- Lewis, M., Liu, Y., Goyal, N., et al. (2019). *BART: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension*. arXiv:1910.13461.  
+- SemEval Task Organizers. (2025). *SemEval-2025 Task 10: Explaining dominant narratives in multilingual news articles*.  
+- Radford, A., Wu, J., Child, R., et al. (2019). *Language models are unsupervised multitask learners*. OpenAI Blog.  
+- Wang, W., Wei, F., Dong, L., Bao, H., Yang, N., & Zhou, M. (2020). *MiniLM: Deep self-attention distillation for task-agnostic compression of pre-trained transformers*. NeurIPS 33, 5776–5788.  
+- Zhang, T., Kishore, V., Wu, F., Weinberger, K. Q., & Artzi, Y. (2020). *BERTScore: Evaluating text generation with BERT*. arXiv:1904.09675.
