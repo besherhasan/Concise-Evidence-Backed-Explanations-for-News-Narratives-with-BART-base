@@ -1,4 +1,4 @@
-# NLP Assignment 2: Subtask C – Explaining Dominant Narratives
+# Shared Subtask C – Explaining Dominant Narratives
 
 **Author:** Besher Hassan  
 **MBZUAI Leaderboard Team Name:** Besher  
@@ -115,3 +115,4 @@ This approach establishes an effective framework for explaining dominant narrati
 - Radford, A., Wu, J., Child, R., et al. (2019). *Language models are unsupervised multitask learners*. OpenAI Blog.  
 - Wang, W., Wei, F., Dong, L., Bao, H., Yang, N., & Zhou, M. (2020). *MiniLM: Deep self-attention distillation for task-agnostic compression of pre-trained transformers*. NeurIPS 33, 5776–5788.  
 - Zhang, T., Kishore, V., Wu, F., Weinberger, K. Q., & Artzi, Y. (2020). *BERTScore: Evaluating text generation with BERT*. arXiv:1904.09675.
+
