@@ -4,29 +4,27 @@ NLP701 Assignment 2: Multilingual Characterization and Extraction of Narratives
 This repository contains the implementation for Subtask C of SemEval-2025 Task 10, focusing on generating concise and evidence-supported explanations for dominant narratives in online news articles. The project employs a fine-tuned BART-base model to achieve state-of-the-art performance for this task.
 
 Project Structure:
-
 nlp701_assignment/
-├── data/                            # Data files
-│   ├── combined_train_set_with_splits.xlsx  # Training and validation data
-│   ├── combined_dev_set.xlsx               # Development data
-├── src/                             # Source code for the BART model with best score
-│   ├── dataset.py                   # Dataset class
-│   ├── preprocess.py                # Preprocessing code
-│   ├── train.py                     # Training script
-│   ├── evaluate.py                  # Evaluation script
-│   ├── generate.py                  # Text generation script
-├── Best Model Weight (Bart-Base)/       #Model weight of Bart-base Best model
-│   ├── best_bart_model_assignment2/ # Fine-tuned BART-base model
-│       ├── config.json
-│       ├── pytorch_model.bin
-│       ├── tokenizer_config.json
-│       ├── vocab.json
-├── requirements.txt                 # Dependencies for the project
-├── README.md
-├── Prediction/              prediction data documentation
-├── Additional experiments/        # Contain extra experimetns but with poor models
-and directories
-└── run.sh                           # Script to run the complete workflow
+├─ data/ # Data files
+│ ├─ combined_train_set_with_splits.xlsx # Training & validation
+│ └─ combined_dev_set.xlsx # Development set
+├─ src/ # Core code (best BART-base)
+│ ├─ dataset.py # Dataset class
+│ ├─ preprocess.py # Preprocessing
+│ ├─ train.py # Training script
+│ ├─ evaluate.py # Evaluation script
+│ └─ generate.py # Text generation
+├─ Best Model Weight (Bart-Base)/ # Fine-tuned model weights
+│ └─ best_bart_model_assignment2/
+│ ├─ config.json
+│ ├─ pytorch_model.bin
+│ ├─ tokenizer_config.json
+│ └─ vocab.json
+├─ Prediction/ # Prediction data & docs
+├─ Additional experiments/ # Extra experiments (lower scores)
+├─ requirements.txt # Project dependencies
+├─ run.sh # Run full workflow
+└─ README.md
 
 Setup
 
@@ -127,4 +125,5 @@ This project was developed by Besher Hassan for NLP701 at MBZUAI. For any questi
 Email: Besher.Hassan@mbzuai.ac.ae
 
 License
+
 This project is for academic use only as part of the NLP701 course.
